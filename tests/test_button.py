@@ -142,3 +142,20 @@ class TestAsyncPress:
         manager.client = None
 
         asyncio.run(button.async_press())
+
+    def test_no_write_on_gen1_device(self):
+        """async_press silently returns on Gen1 hardware even if connected."""
+        hass = MagicMock()
+        gen1_manager = PowerWatchdogManager(
+            hass, "AA:BB:CC:DD:EE:FF", "Gen1 Watchdog",
+            ble_name="PMS1234567890123456",
+        )
+        mock_client = MagicMock()
+        mock_client.is_connected = True
+        mock_client.write_gatt_char = AsyncMock()
+        gen1_manager.client = mock_client
+
+        btn = WatchdogResetButton(gen1_manager)
+        asyncio.run(btn.async_press())
+
+        mock_client.write_gatt_char.assert_not_called()

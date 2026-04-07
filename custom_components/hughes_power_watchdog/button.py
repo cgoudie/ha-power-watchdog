@@ -44,6 +44,8 @@ class WatchdogResetButton(ButtonEntity):
 
     async def async_press(self) -> None:
         """Send the energy reset command to the device."""
+        if self._manager.generation == 1:
+            return
         if self._manager.client and self._manager.client.is_connected:
             payload = bytes.fromhex(CMD_RESET_ENERGY)
             await self._manager.client.write_gatt_char(
